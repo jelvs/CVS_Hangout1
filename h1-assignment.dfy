@@ -25,9 +25,9 @@ requires isSet(b, nb)
 ensures isSet(z, nz)
 ensures nz <= z.Length <= na + nb
 ensures 0 <= nz 
-ensures forall j :: 0 < j < na ==> (contains(a, na, a[j]) && !contains(b, nb, a[j])) ==> contains(z, nz, a[j])
-ensures forall j :: 0 < j < nb ==> (contains(b, nb, b[j]) && !contains(a, na, b[j])) ==> contains(z, nz, b[j])
-ensures forall e :: e in z[..nz] ==> (contains(a, na, e) || contains(b, nb, e)) && !(contains(a, na, e) && contains(b, nb, e))
+ensures forall f :: f in z[..nz] <==> (contains(a, na, f) && !contains(b, nb, f)) || (contains(b, nb, f) && !contains(a, na, f))
+ensures forall f :: contains(a, na, f) && !contains(b, nb, f) ==> contains(z, nz, f)
+ensures forall f :: contains(b, nb, f) && !contains(a, na, f) ==> contains(z, nz, f)
 
 
 {
@@ -42,15 +42,14 @@ ensures forall e :: e in z[..nz] ==> (contains(a, na, e) || contains(b, nb, e)) 
     invariant nz <= na
     invariant nz <= i
     invariant 0 <= i <= na
-    //invariant 0 <= na <= n
-    //invariant forall j :: 0 < j < na => contains(z, nz, a[j]) || !contains(b, nb, b[j])
-    invariant forall e :: e in z[..nz] ==> (contains(a, na, e) || contains(b, nb, e)) && !(contains(a, na, e) && contains(b, nb, e))
-    invariant forall f :: f in a[..i] ==> !contains(b, nb, f) ==> contains(z , nz, f)
+    invariant forall f :: f in z[..nz] <==> (contains(a, i, f) && !contains(b, nb, f)) 
+    invariant forall f :: f in z[..nz] ==>  contains(a, na, f)
+    invariant forall f :: contains(a, na, f) && contains(b, nb, f) ==> !contains(z, nz, f)
     {
-        // Arranjar forma de tirar a[i] !in z[..nz] (garantir que o i ainda nao esta no z)
-        if(a[i]) !in b[..nb] && a[i] !in z[..nz]{
+        
+        if(!contains(b, nb, a[i])){
             z[nz] := a[i];
-            assert forall f :: f in a[..i] ==> !contains(b, nb, f) ==> contains(z , nz, f);
+            assert forall f :: contains(z, nz, f) <==> contains(a, i, f) && !contains(b , nb, f);
             nz := nz + 1;
         }
         i := i + 1;
@@ -63,22 +62,20 @@ ensures forall e :: e in z[..nz] ==> (contains(a, na, e) || contains(b, nb, e)) 
 
     while ( i < nb)
     decreases nb - i
-    invariant 0 <= nz <= z.Length
+    invariant curr <= nz <= z.Length
     invariant isSet(z, nz)
     invariant nz <= nb + na
-    invariant nz <= i + na
+    invariant nz <= curr + i
     invariant 0 <= i <= nb
     invariant curr <= nz
-    //invariant 0 <= na <= n
-    //invariant forall j :: 0 < j < na => contains(z, nz, a[j]) || !contains(b, nb, b[j])
-    invariant forall e :: e in z[..nz] ==> (contains(b, nb, e) || contains(a, na, e)) && !(contains(a, na, e) && contains(b, nb, e))
-    invariant forall f :: f in a[..na] ==> !contains(b, nb, f) ==> contains(z , curr, f)
-    invariant forall f :: f in b[..i] ==> !contains(a, na, f) ==> contains(z , nz, f)
+    invariant forall f :: f in z[..nz] <==>  (contains(a, na, f) && !contains(b, nb, f)) || (contains(b, i, f) && !contains(a, na, f))
+    invariant forall f :: f in b[..i] && !contains(a, na, f) ==> contains(z , nz, f)
+    //invariant forall f :: f in a[..na] && !contains(b, nb, f) <==> contains(z , curr, f)
+     //invariant forall f :: f in z[..nz] ==> (contains(b, nb, f) || contains(a, na, f)) && !(contains(a, na, f) && contains(b, nb, f))
     {
-        // Arranjar forma de tirar a[i] !in z[..nz] (garantir que o i ainda nao esta no z)
-        if(b[i]) !in a[..na] && b[i] !in z[..nz]{
+        if(!contains(z, nz, b[i]) && !contains(a, na, b[i])){
             z[nz] := b[i];
-            assert forall f :: f in b[..i] ==> !contains(a, na, f) ==> contains(z , nz, f);
+            assert forall f :: f in b[..i] && !contains(a, na, f) ==> contains(z , nz, f);
 
             nz := nz + 1;  
         }
