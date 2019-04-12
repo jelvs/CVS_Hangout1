@@ -1,4 +1,6 @@
 /**
+    Trabalho elaborado por : Tiago Sousa - 43364
+
     ©João Costa Seco, Eduardo Geraldo, CVS, FCT NOVA, MIEI 2019
  */
 
@@ -44,7 +46,7 @@ ensures forall f :: contains(b, nb, f) && !contains(a, na, f) ==> contains(z, nz
     invariant 0 <= i <= na
     invariant forall f :: f in z[..nz] <==> (contains(a, i, f) && !contains(b, nb, f)) 
     invariant forall f :: f in z[..nz] ==>  contains(a, na, f)
-    invariant forall f :: contains(a, na, f) && contains(b, nb, f) ==> !contains(z, nz, f)
+    invariant forall f :: contains(a, i, f) && contains(b, nb, f) ==> !contains(z, nz, f)
     {
         
         if(!contains(b, nb, a[i])){
@@ -68,14 +70,13 @@ ensures forall f :: contains(b, nb, f) && !contains(a, na, f) ==> contains(z, nz
     invariant nz <= curr + i
     invariant 0 <= i <= nb
     invariant curr <= nz
-    invariant forall f :: f in z[..nz] <==>  (contains(a, na, f) && !contains(b, nb, f)) || (contains(b, i, f) && !contains(a, na, f))
+    invariant forall f :: f in z[..nz] <==> (contains(a, na, f) && !contains(b, nb, f)) || (contains(b, i, f) && !contains(a, na, f))
     invariant forall f :: f in b[..i] && !contains(a, na, f) ==> contains(z , nz, f)
-    //invariant forall f :: f in a[..na] && !contains(b, nb, f) <==> contains(z , curr, f)
-     //invariant forall f :: f in z[..nz] ==> (contains(b, nb, f) || contains(a, na, f)) && !(contains(a, na, f) && contains(b, nb, f))
+   
     {
         if(!contains(z, nz, b[i]) && !contains(a, na, b[i])){
             z[nz] := b[i];
-            assert forall f :: f in b[..i] && !contains(a, na, f) ==> contains(z , nz, f);
+            assert forall f :: f in z[..nz] <==> (contains(a, na, f) && !contains(b, nb, f)) || (contains(b, i, f) && !contains(a, na, f));
 
             nz := nz + 1;  
         }
